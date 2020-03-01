@@ -1,6 +1,6 @@
+import 'package:clima/services/networking.dart';
 import 'package:flutter/material.dart';
 import '../services/location.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class LoadingScreen extends StatefulWidget {
@@ -13,29 +13,22 @@ final apiKey = DotEnv().env['API_KEY'];
 class _LoadingScreenState extends State<LoadingScreen> {
   Location location = Location();
 
-  Future<void> getLocation() async {
+  Future<void> getLocationData() async {
     await location.getCurrentLocation();
-  }
+    NetworkHelper networkHelper = NetworkHelper(url: 'http://api.openweathermap.org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}&appid=$apiKey');
 
-  void getData() async {
-    await getLocation();
-    try {
-      http.Response response = await http.get(
-          'http://api.openweathermap.org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}&appid=$apiKey');
-      if (response.statusCode == 200) {
-        print(response.body);
-      } else {
-        print(response.statusCode);
-      }
-    } catch (e) {
-      print(e);
-    }
+    final decodedData = await networkHelper.getData();
+    double temp = decodedData['main']['temp'];
+    int condition = decodedData['weather'][0]['id'];
+    String cityName = decodedData['name'];
+
+    print([temp, condition, cityName]);
   }
 
   @override
   void initState() {
     super.initState();
-    getData();
+    getLocationData();
   }
 
   @override
@@ -44,7 +37,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       body: Center(
         child: RaisedButton(
           onPressed: () {
-            getData();
+            getLocationData();
           },
           child: Text('Get Location'),
         ),
