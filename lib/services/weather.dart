@@ -1,5 +1,20 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:clima/services/networking.dart';
+import 'package:clima/services/location.dart';
+
 class WeatherModel {
-  String getWeatherIcon(int condition) {
+  Future<dynamic> getWeatherData() async {
+    final apiKey = DotEnv().env['API_KEY'];
+    Location location = Location();
+    await location.getCurrentLocation();
+    NetworkHelper networkHelper = NetworkHelper(
+        url:
+            'http://api.openweathermap.org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}&appid=$apiKey&units=metric');
+    final weatherData = await networkHelper.getData();
+    return weatherData;
+  }
+
+  static String getWeatherIcon(int condition) {
     if (condition < 300) {
       return '🌩';
     } else if (condition < 400) {
@@ -19,7 +34,7 @@ class WeatherModel {
     }
   }
 
-  String getMessage(int temp) {
+  static String getMessage(int temp) {
     if (temp > 25) {
       return 'It\'s 🍦 time';
     } else if (temp > 20) {
