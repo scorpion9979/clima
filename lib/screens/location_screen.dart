@@ -25,11 +25,18 @@ class _LocationScreenState extends State<LocationScreen> {
 
   void updateUI(weatherData) {
     setState(() {
+      if (weatherData == null) {
+        temp = 0;
+        cityName = '';
+        weatherIcon = 'Error';
+        weatherMessage = "Couldn't find weather data";
+        return;
+      }
       temp = (weatherData['main']['temp']).toInt();
       condition = weatherData['weather'][0]['id'];
       cityName = weatherData['name'];
       weatherIcon = WeatherModel.getWeatherIcon(condition);
-      weatherMessage = WeatherModel.getMessage(temp);
+      weatherMessage = "${WeatherModel.getMessage(temp)} in $cityName!";
     });
   }
 
@@ -67,7 +74,10 @@ class _LocationScreenState extends State<LocationScreen> {
                   ),
                   FlatButton(
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => CityScreen()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CityScreen()));
                     },
                     child: Icon(
                       Icons.location_city,
@@ -94,7 +104,7 @@ class _LocationScreenState extends State<LocationScreen> {
               Padding(
                 padding: EdgeInsets.only(right: 15.0),
                 child: Text(
-                  "$weatherMessage in $cityName!",
+                  "$weatherMessage",
                   textAlign: TextAlign.right,
                   style: kMessageTextStyle,
                 ),
